@@ -11,6 +11,7 @@ public class SceneOrderWindow : EditorWindow
     private ListView sceneListView;
     private VisualElement _myElement;
     private Button _currentSceneButton;
+    private Button _addCurrentSceneButton;
 
     private float itemHeight = EditorGUIUtility.singleLineHeight + 5;
 
@@ -18,36 +19,46 @@ public class SceneOrderWindow : EditorWindow
     public static void ShowWindow()
     {
         var window = GetWindow<SceneOrderWindow>("Scene Order");
-        window.minSize = new Vector2(200, 200);
+        window.minSize = new Vector2(250, 200);
     }
 
     private void OnEnable()
     {
         LoadScenes();
         CreateUI();
-
+        EditorSceneManager.sceneOpened += UpdateAddSceneButton;
         EditorBuildSettings.sceneListChanged += UpdateUI;
     }
+
+    private void UpdateAddSceneButton(Scene scene, OpenSceneMode mode)
+    {
+        UpdateAddCurrentSceneButtonState();
+    }
+
 
     private void UpdateUI()
     {
         LoadScenes();
 
         sceneListView.itemsSource = scenes;
-        sceneListView.Rebuild(); 
+        sceneListView.Rebuild();
+        UpdateAddCurrentSceneButtonState();
     }
 
 
 
-    private void OnDestroy() => EditorBuildSettings.sceneListChanged -= UpdateUI;
+    private void OnDestroy()
+    {
+        EditorBuildSettings.sceneListChanged -= UpdateUI;
+        EditorSceneManager.sceneOpened -= UpdateAddSceneButton;
+
+    }
 
     private void LoadScenes() => scenes = EditorBuildSettings.scenes;
 
     private void CreateUI()
     {
         _myElement = rootVisualElement;
-
-
 
         // Contenedor principal con borde negro
         var mainContainer = new VisualElement();
@@ -70,20 +81,71 @@ public class SceneOrderWindow : EditorWindow
         title.style.unityTextAlign = TextAnchor.MiddleCenter;
         mainContainer.Add(title);
 
+        // Botón para agregar la escena actual al EditorBuildSettings
+        _addCurrentSceneButton = new Button();
+        _addCurrentSceneButton.clickable.clicked += AddCurrentSceneToBuildSettings;
+        _addCurrentSceneButton.style.marginBottom = 5;
+        mainContainer.Add(_addCurrentSceneButton);
 
 
         sceneListView = new ListView(scenes, itemHeight, MakeItem, BindItem);
         sceneListView.style.flexGrow = 1;
         sceneListView.reorderable = true; // Permitir reordenamiento
         mainContainer.Add(sceneListView);
+
+
+
+        UpdateAddCurrentSceneButtonState();
+    }
+
+    private void AddCurrentSceneToBuildSettings()
+    {
+        var currentScenePath = SceneManager.GetActiveScene().path;
+
+        // Verificar si la escena actual no está en el EditorBuildSettings
+        if (!IsSceneActiveInBuild(currentScenePath))
+        {
+            // Agregar la escena actual al EditorBuildSettings
+            var newScenesList = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            newScenesList.Add(new EditorBuildSettingsScene(currentScenePath, true));
+            EditorBuildSettings.scenes = newScenesList.ToArray();
+            Debug.Log("Current scene added to Build Settings.");
+        }
+        else
+        {
+            Debug.Log("Current scene already exists in Build Settings.");
+        }
+
+        UpdateAddCurrentSceneButtonState();
+    }
+
+    private void UpdateAddCurrentSceneButtonState()
+    {
+        Debug.Log("UPDATEO?");
+        var currentScenePath = SceneManager.GetActiveScene().path;
+        if (IsSceneExistInBuild(currentScenePath))
+        {
+            // Si la escena actual está en el EditorBuildSettings, deshabilitar el botón y mostrar el mensaje correspondiente
+            _addCurrentSceneButton.SetEnabled(false);
+            _addCurrentSceneButton.text = "Current scene already in build";
+            _addCurrentSceneButton.style.backgroundColor = Color.green;
+            _addCurrentSceneButton.style.color = Color.white;
+        }
+        else
+        {
+            // Si la escena actual no está en el EditorBuildSettings, habilitar el botón y mostrar el mensaje correspondiente
+            _addCurrentSceneButton.SetEnabled(true);
+            _addCurrentSceneButton.text = "Add current scene";
+            _addCurrentSceneButton.style.backgroundColor = Color.yellow;
+            _addCurrentSceneButton.style.color = Color.black;
+
+        }
     }
 
     private VisualElement MakeItem()
     {
         var container = new VisualElement();
         container.style.flexDirection = FlexDirection.Row;
-        container.style.paddingTop = 5; // Ajustar el relleno superior
-        container.style.paddingBottom = 5; // Ajustar el relleno inferior
 
         // Establecer el estilo del borde del contenedor
         container.style.borderTopWidth = 1;
@@ -99,7 +161,7 @@ public class SceneOrderWindow : EditorWindow
         container.Add(activeToggle);
 
         var nameLabel = new Label();
-        nameLabel.style.unityTextAlign = TextAnchor.MiddleCenter; // Centrar el texto horizontalmente
+        nameLabel.style.unityTextAlign = TextAnchor.MiddleLeft; // Centrar el texto horizontalmente
         nameLabel.style.flexGrow = 1; // Permitir que el nombre de la escena ocupe todo el espacio disponible
         container.Add(nameLabel);
 
@@ -120,6 +182,11 @@ public class SceneOrderWindow : EditorWindow
         goToButton.style.borderBottomColor = Color.white;
         goToButton.style.borderLeftColor = Color.white;
         goToButton.style.borderRightColor = Color.white;
+
+        var removeButton = new Button();
+        removeButton.text = "x";
+        removeButton.style.backgroundColor = Color.red;
+        removeButton.style.color = Color.white;
 
 
         return container;
@@ -159,6 +226,19 @@ public class SceneOrderWindow : EditorWindow
                 UpdateBUttonUI(goToButton);
             }
         };
+
+        var removeButton = new Button();
+        removeButton.text = "X";
+        removeButton.style.backgroundColor = Color.red;
+        removeButton.style.color = Color.white;
+        removeButton.clicked += () =>
+        {
+            RemoveSceneFromBuild(scene.path);
+        };
+
+        element.Add(removeButton);
+
+
 
 
         element.RegisterCallback<DragUpdatedEvent>(evt =>
@@ -200,6 +280,31 @@ public class SceneOrderWindow : EditorWindow
             goToButton.SetEnabled(true);
             goToButton.style.backgroundColor = Color.gray;
         }
+    }
+
+
+    private void RemoveSceneFromBuild(string scenePath)
+    {
+        var newScenesList = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+
+        for (int i = 0; i < newScenesList.Count; i++)
+        {
+            if (newScenesList[i].path == scenePath)
+            {
+                newScenesList.RemoveAt(i);
+                EditorBuildSettings.scenes = newScenesList.ToArray();
+                break;
+            }
+        }
+    }
+    private bool IsSceneExistInBuild(string scenePath)
+    {
+        foreach (var buildScene in EditorBuildSettings.scenes)
+        {
+            if (buildScene.path == scenePath)
+                    return true;
+        }
+        return false;
     }
 
     private bool IsSceneActiveInBuild(string scenePath)
