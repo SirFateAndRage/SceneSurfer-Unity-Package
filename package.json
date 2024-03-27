@@ -1,6 +1,6 @@
 {
   "name": "com.sirfateandrage.scenesurfer-unity-package",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "displayName": "Scene Surfer",
   "description": "SceneSurfer is a versatile tool tailored to streamline scene navigation within your Unity project. With SceneSurfer, you can seamlessly traverse between scenes included in the build settings. Moreover, it intelligently alerts you to scenes that are not currently included in the build settings, providing convenient prompts to add or remove them as necessary. This functionality empowers efficient management of your project's scene structure, ensuring all relevant scenes are properly integrated into your build configuration.",
   "unity": "2019.1",
