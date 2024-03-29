@@ -2,33 +2,25 @@
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace SFR.SceneSurfer
 {
-    public class SceneSurferWindowBuilder
+    public class SceneInBuild : WindowBuilder
     {
-        private SceneSurferWindow _window;
         private SceneSurferListViewBuilder _sceneListView;
         private AddSceneBuilder _sceneActionHandler;
         private SceneSurferGoToSceneButton _sceneSuferGoToSceneButton;
 
-        public SceneSurferWindowBuilder(SceneSurferWindow window)
+        public SceneInBuild(EditorWindowInitializer window) : base(window)
         {
-            _window = window;
-            Initialize();
         }
 
-        private void Initialize()
+        protected override void CreateUI(EditorWindowInitializer windowInitializer)
         {
-            CreateUI();
-            RegisterEvents();
-        }
+            VisualElement rootElement = windowInitializer.rootVisualElement;
 
-        private void CreateUI()
-        {
-            VisualElement rootElement = _window.rootVisualElement;
-
-            SceneUIBuilder uiBuilder = new(rootElement);
+            MainBoxUIView uiBuilder = new(rootElement,1,5,"Scene in build",Color.black);
             VisualElement sceneSurferMainContainer = uiBuilder.SceneListContainer;
 
             _sceneActionHandler = new(uiBuilder.SceneListContainer);
@@ -49,7 +41,7 @@ namespace SFR.SceneSurfer
             return buttonElementList;
         }
 
-        private void RegisterEvents()
+        protected override void RegisterEvents()
         {
             EditorBuildSettings.sceneListChanged += _sceneListView.UpdateUI;
 
@@ -59,7 +51,7 @@ namespace SFR.SceneSurfer
             EditorSceneManager.sceneOpened += _sceneSuferGoToSceneButton.UpdateAddSceneButton;
         }
 
-        public void Cleanup()
+        public override void Cleanup()
         {
             EditorBuildSettings.sceneListChanged -= _sceneListView.UpdateUI;
 
