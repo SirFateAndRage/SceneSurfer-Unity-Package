@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
+using System;
 
 namespace SFR.SceneSurfer
 {
@@ -65,6 +66,9 @@ namespace SFR.SceneSurfer
 
         private void SetButtonToDefault(Button button)
         {
+            if (null == button)
+                return;
+
             button.text = "Go To";
             button.SetEnabled(true);
             button.style.backgroundColor = Color.gray;

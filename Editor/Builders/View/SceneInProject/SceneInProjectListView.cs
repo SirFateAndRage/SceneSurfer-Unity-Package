@@ -1,29 +1,25 @@
-﻿using UnityEditor;
-using UnityEngine.UIElements;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace SFR.SceneSurfer
 {
-    public class SceneSurferListViewBuilder
+    public class SceneInProjectListView
     {
         private ListView _listView;
-        private EditorBuildSettingsScene[] _scenes;
-        private readonly SceneSurferToggleBuilder _sceneSurferToggleBuilder;
         private readonly List<IButtonElement> _buttonElementsList;
+        private List<EditorBuildSettingsScene> _notInBuildList;
 
-        private void LoadScenes() => _scenes = EditorBuildSettings.scenes;
-
-        public SceneSurferListViewBuilder(VisualElement container,List<IButtonElement> buttonsElements)
+        public SceneInProjectListView(VisualElement container, List<IButtonElement> buttonsElements)
         {
+            _notInBuildList = SceneNotInBuildHandler.Instance.ScenesNotInBuild;
             _buttonElementsList = buttonsElements;
-            _sceneSurferToggleBuilder = new();
 
-            LoadScenes();
+            SceneNotInBuildHandler.Instance.sceneNoInBuildSubscriber += LoadScene;
 
-            _listView = new ListView(_scenes, EditorGUIUtility.singleLineHeight + 5, MakeItem, BindItem);
+            _listView = new ListView(_notInBuildList, EditorGUIUtility.singleLineHeight + 5, MakeItem, BindItem);
             _listView.style.flexGrow = 1;
-            _listView.reorderable = true;
             container.Add(_listView);
         }
 
@@ -34,15 +30,13 @@ namespace SFR.SceneSurfer
 
             CreateBorder(container);
 
-            VisualElement toggleElement = _sceneSurferToggleBuilder.GetSurferToggle();
-            container.Add(toggleElement);
-
             CreateLabel(container);
 
             SetButtonsElements(container);
 
             return container;
         }
+
         private void CreateBorder(VisualElement container)
         {
             container.style.borderTopWidth = 1;
@@ -54,7 +48,6 @@ namespace SFR.SceneSurfer
             container.style.borderLeftColor = Color.gray;
             container.style.borderRightColor = Color.gray;
         }
-
         private void CreateLabel(VisualElement container)
         {
             Label nameLabel = new Label();
@@ -65,7 +58,10 @@ namespace SFR.SceneSurfer
 
         private void SetButtonsElements(VisualElement container)
         {
-            foreach(IButtonElement buttonElement in _buttonElementsList)
+            if (null == _buttonElementsList || _buttonElementsList.Count == 0)
+                return;
+
+            foreach (IButtonElement buttonElement in _buttonElementsList)
             {
                 VisualElement button = buttonElement.GetButton();
                 container.Add(button);
@@ -74,50 +70,35 @@ namespace SFR.SceneSurfer
 
         private void BindItem(VisualElement element, int index)
         {
-            var scene = _scenes[index];
+            var scene = _notInBuildList[index];
             var nameLabel = element.Q<Label>();
             nameLabel.text = System.IO.Path.GetFileNameWithoutExtension(scene.path);
 
-            _sceneSurferToggleBuilder.BindToggle(scene.path, element);
-
             BindButtonElements(scene.path, element);
 
-            element.RegisterCallback<DragUpdatedEvent>(evt =>
-            {
-                var mouseY = evt.mousePosition.y;
-                var targetIndex = Mathf.Clamp((int)(mouseY / EditorGUIUtility.singleLineHeight + 5), 0, _scenes.Length - 1);
-
-                var topLine = element.ElementAt(1);
-                var bottomLine = element.ElementAt(2); 
-
-                if (targetIndex == index)
-                {
-                    topLine.style.display = DisplayStyle.Flex;
-                    bottomLine.style.display = DisplayStyle.Flex;
-                }
-                else
-                {
-                    topLine.style.display = DisplayStyle.None;
-                    bottomLine.style.display = DisplayStyle.None;
-                }
-
-                evt.StopPropagation();
-            });
-            EditorBuildSettings.scenes = _scenes;
         }
 
-        private void BindButtonElements(string path,VisualElement container)
+        private void BindButtonElements(string path, VisualElement container)
         {
+            if (null == _buttonElementsList || _buttonElementsList.Count == 0)
+                return;
+
             foreach (IButtonElement buttonElement in _buttonElementsList)
             {
                 buttonElement.BindButton(path, container);
             }
         }
 
-        public void UpdateUI()
+        private void LoadScene(List<EditorBuildSettingsScene> obj)
         {
-            LoadScenes();
-            _listView.itemsSource = _scenes;
+            Debug.Log("ENTRO EN EL LOAD????");
+
+            foreach(var item in obj)
+            {
+                Debug.Log("Load " + item.path);
+            }
+            _notInBuildList = obj;
+            _listView.itemsSource = _notInBuildList;
             _listView.Rebuild();
         }
     }

@@ -5,7 +5,8 @@ namespace SFR.SceneSurfer
 {
     public class EditorWindowInitializer : EditorWindow
     {
-        private SceneInBuild _SceneOnBuildBuilder;
+        private SceneInBuild _sceneOnBuildBuilder;
+        private ScenesInProject _sceneInProject;
 
         [MenuItem("SFR/Tools/SceneSurfer")]
         public static void InitializeWindow()
@@ -14,8 +15,16 @@ namespace SFR.SceneSurfer
             window.minSize = new Vector2(250, 200);
         }
 
-        private void OnEnable() => _SceneOnBuildBuilder = new(this);
+        private void OnEnable()
+        {
+            _sceneOnBuildBuilder = new(this);
+            _sceneInProject = new(this);
+        }
 
-        private void OnDestroy() => _SceneOnBuildBuilder.Cleanup();
+        private void OnDestroy()
+        {
+            _sceneOnBuildBuilder.Cleanup();
+            _sceneInProject.Cleanup();
+        }
     }
 }
