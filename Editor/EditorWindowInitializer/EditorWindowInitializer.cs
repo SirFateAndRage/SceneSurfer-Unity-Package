@@ -12,7 +12,7 @@ namespace SFR.SceneSurfer
         public static void InitializeWindow()
         {
             EditorWindowInitializer window = GetWindow<EditorWindowInitializer>("Scene Surfer");
-            window.minSize = new Vector2(250, 200);
+            window.minSize = new Vector2(250, 250);
         }
 
         private void OnEnable()

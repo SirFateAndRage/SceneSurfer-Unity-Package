@@ -27,6 +27,11 @@ namespace SFR.SceneSurfer
 
             List<IButtonElement> buttonElementList = GetButtonElementList();
             _sceneListView = new SceneSurferListViewBuilder(sceneSurferMainContainer, buttonElementList);
+
+
+            VisualElement spaceElement = new();
+            spaceElement.style.height = 10;
+            rootElement.Add(spaceElement);
         }
 
         private List<IButtonElement> GetButtonElementList()
