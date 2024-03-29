@@ -91,12 +91,6 @@ namespace SFR.SceneSurfer
 
         private void LoadScene(List<EditorBuildSettingsScene> obj)
         {
-            Debug.Log("ENTRO EN EL LOAD????");
-
-            foreach(var item in obj)
-            {
-                Debug.Log("Load " + item.path);
-            }
             _notInBuildList = obj;
             _listView.itemsSource = _notInBuildList;
             _listView.Rebuild();

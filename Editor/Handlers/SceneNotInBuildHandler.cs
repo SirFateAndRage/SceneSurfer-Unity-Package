@@ -51,20 +51,12 @@ namespace SFR.SceneSurfer
                     _scenesNotInBuild.Add(new EditorBuildSettingsScene(scenePath, true));
                 }
             }
-
             sceneNoInBuildSubscriber?.Invoke(_scenesNotInBuild);
         }
 
         public void RebuildOnRemoveScene(string scenePath)
         {
-            Debug.Log("SCENE PATH QUEQUIERO ELIMINAR " + scenePath);
             _scenesNotInBuild.RemoveAll(scene => scene.path == scenePath);
-
-            foreach (var item in _scenesNotInBuild)
-            {
-                Debug.Log("PATH QUE ESTAN + " + item.path);
-            }
-
             sceneNoInBuildSubscriber?.Invoke(_scenesNotInBuild);
         }
 
