@@ -8,18 +8,17 @@ namespace SFR.SceneSurfer
     public class SceneSurferListViewBuilder
     {
         private ListView _listView;
-        private EditorBuildSettingsScene[] _scenes;
+        private List<EditorBuildSettingsScene> _scenes;
         private readonly SceneSurferToggleBuilder _sceneSurferToggleBuilder;
         private readonly List<IButtonElement> _buttonElementsList;
 
-        private void LoadScenes() => _scenes = EditorBuildSettings.scenes;
-
         public SceneSurferListViewBuilder(VisualElement container,List<IButtonElement> buttonsElements)
         {
+            _scenes = SceneInBuildHandler.Instance.EditoSceneInBuild;
             _buttonElementsList = buttonsElements;
             _sceneSurferToggleBuilder = new();
 
-            LoadScenes();
+            SceneInBuildHandler.Instance.OnChangeOnEditorbuildsSettings += ReLoadScene;
 
             _listView = new ListView(_scenes, EditorGUIUtility.singleLineHeight + 5, MakeItem, BindItem);
             _listView.style.flexGrow = 1;
@@ -88,7 +87,7 @@ namespace SFR.SceneSurfer
             element.RegisterCallback<DragUpdatedEvent>(evt =>
             {
                 var mouseY = evt.mousePosition.y;
-                var targetIndex = Mathf.Clamp((int)(mouseY / EditorGUIUtility.singleLineHeight + 5), 0, _scenes.Length - 1);
+                var targetIndex = Mathf.Clamp((int)(mouseY / EditorGUIUtility.singleLineHeight + 5), 0, _scenes.Count - 1);
 
                 var topLine = element.ElementAt(1);
                 var bottomLine = element.ElementAt(2); 
@@ -106,7 +105,7 @@ namespace SFR.SceneSurfer
 
                 evt.StopPropagation();
             });
-            EditorBuildSettings.scenes = _scenes;
+            EditorBuildSettings.scenes = _scenes.ToArray();
         }
 
         private void BindButtonElements(string path,VisualElement container)
@@ -120,9 +119,9 @@ namespace SFR.SceneSurfer
             }
         }
 
-        public void UpdateUI()
+        private void ReLoadScene(List<EditorBuildSettingsScene> obj)
         {
-            LoadScenes();
+            _scenes = obj;
             _listView.itemsSource = _scenes;
             _listView.Rebuild();
         }

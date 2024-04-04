@@ -48,8 +48,9 @@ namespace SFR.SceneSurfer
 
         protected override void RegisterEvents()
         {
-            EditorBuildSettings.sceneListChanged += _sceneListView.UpdateUI;
+            
 
+            EditorBuildSettings.sceneListChanged += SceneInBuildHandler.Instance.RebuildOnEvent;
             EditorBuildSettings.sceneListChanged += _sceneActionHandler.UpdateButton;
             EditorSceneManager.sceneOpened += _sceneActionHandler.UpdateButton;
 
@@ -58,7 +59,9 @@ namespace SFR.SceneSurfer
 
         public override void Cleanup()
         {
-            EditorBuildSettings.sceneListChanged -= _sceneListView.UpdateUI;
+            SceneInBuildHandler.Instance.CleanUp();
+
+            EditorBuildSettings.sceneListChanged -= SceneInBuildHandler.Instance.RebuildOnEvent;
 
             EditorBuildSettings.sceneListChanged -= _sceneActionHandler.UpdateButton;
             EditorSceneManager.sceneOpened -= _sceneActionHandler.UpdateButton;

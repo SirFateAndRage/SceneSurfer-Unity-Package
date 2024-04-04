@@ -18,16 +18,16 @@ namespace SFR.SceneSurfer
         {
             SceneNotInBuildHandler.Instance.Cleanup();
 
-            EditorBuildSettings.sceneListChanged -= SceneNotInBuildHandler.Instance.UpdateSceneNotInBuild;
+            EditorBuildSettings.sceneListChanged -= SceneNotInBuildHandler.Instance.UpdateScenes;
             AssetDatabase.importPackageCompleted -= SceneNotInBuildHandler.Instance.OnPackageImported;
-            EditorBuildSettings.sceneListChanged -= SceneNotInBuildHandler.Instance.UpdateSceneNotInBuild;
+            EditorBuildSettings.sceneListChanged -= SceneNotInBuildHandler.Instance.UpdateScenes;
             EditorSceneManager.sceneOpened -= _sceneSuferGoToSceneButton.UpdateAddSceneButton;
         }
 
         protected override void CreateUI(EditorWindowInitializer windowInitializer)
         {
 
-            SceneNotInBuildHandler.Instance.UpdateSceneNotInBuild();
+            SceneNotInBuildHandler.Instance.UpdateScenes();
 
             VisualElement rootElement = windowInitializer.rootVisualElement;
 
@@ -54,9 +54,9 @@ namespace SFR.SceneSurfer
 
         protected override void RegisterEvents()
         {
-            EditorBuildSettings.sceneListChanged += SceneNotInBuildHandler.Instance.UpdateSceneNotInBuild;
+            EditorBuildSettings.sceneListChanged += SceneNotInBuildHandler.Instance.UpdateScenes;
             AssetDatabase.importPackageCompleted += SceneNotInBuildHandler.Instance.OnPackageImported;
-            EditorBuildSettings.sceneListChanged += SceneNotInBuildHandler.Instance.UpdateSceneNotInBuild;
+            EditorBuildSettings.sceneListChanged += SceneNotInBuildHandler.Instance.UpdateScenes;
             EditorSceneManager.sceneOpened += _sceneSuferGoToSceneButton.UpdateAddSceneButton;
         }
     }

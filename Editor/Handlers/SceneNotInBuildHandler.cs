@@ -27,9 +27,9 @@ namespace SFR.SceneSurfer
 
         public List<EditorBuildSettingsScene> ScenesNotInBuild { get => _scenesNotInBuild;}
 
-        private SceneNotInBuildHandler() => UpdateSceneNotInBuild();
+        private SceneNotInBuildHandler() => UpdateScenes();
 
-        public void OnPackageImported(string packageName) => UpdateSceneNotInBuild();
+        public void OnPackageImported(string packageName) => UpdateScenes();
 
         public void Cleanup()
         {
@@ -37,8 +37,9 @@ namespace SFR.SceneSurfer
             _scenesNotInBuild.Clear();
         }
 
-        public void UpdateSceneNotInBuild()
+        public void UpdateScenes()
         {
+            Debug.Log("FFF3?");
             string[] allScenePaths = AssetDatabase.FindAssets("t:Scene")
                                                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                                                    .ToArray();

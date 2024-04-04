@@ -12,7 +12,8 @@ namespace SFR.SceneSurfer
                     !System.Array.Exists(movedFromAssetPaths, element => element == importedAsset) &&
                     IsSceneAsset(importedAsset))
                 {
-                    SceneNotInBuildHandler.Instance.UpdateSceneNotInBuild();
+                    SceneNotInBuildHandler.Instance.UpdateScenes();
+                    SceneInBuildHandler.Instance.RebuildOnEvent();
                 }
             }
         }
