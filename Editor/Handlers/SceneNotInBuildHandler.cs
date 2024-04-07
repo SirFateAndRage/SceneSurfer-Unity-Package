@@ -39,7 +39,6 @@ namespace SFR.SceneSurfer
 
         public void UpdateScenes()
         {
-            Debug.Log("FFF3?");
             string[] allScenePaths = AssetDatabase.FindAssets("t:Scene")
                                                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                                                    .ToArray();
