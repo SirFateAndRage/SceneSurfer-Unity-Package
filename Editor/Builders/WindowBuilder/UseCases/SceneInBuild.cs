@@ -48,8 +48,6 @@ namespace SFR.SceneSurfer
 
         protected override void RegisterEvents()
         {
-            
-
             EditorBuildSettings.sceneListChanged += SceneInBuildHandler.Instance.RebuildOnEvent;
             EditorBuildSettings.sceneListChanged += _sceneActionHandler.UpdateButton;
             EditorSceneManager.sceneOpened += _sceneActionHandler.UpdateButton;
